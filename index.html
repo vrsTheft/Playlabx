@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Blocked Notice</title>
+    <!-- Tailwind CSS for modern utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter and Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Three.js for 3D Car & Ambient Road Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050508;
+            color: #ffffff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Neon Glow Effects */
+        .neon-border {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.25), inset 0 0 15px rgba(147, 51, 234, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .neon-border:hover {
+            box-shadow: 0 0 35px rgba(59, 130, 246, 0.45), inset 0 0 25px rgba(147, 51, 234, 0.3);
+            border-color: rgba(96, 165, 250, 0.4);
+        }
+
+        /* Pulse and Floating Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.005); }
+        }
+
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 3s infinite;
+        }
+
+        /* Canvas Overlay Gradients */
+        .vignette {
+            background: radial-gradient(circle at center, transparent 30%, rgba(5, 5, 8, 0.85) 85%, #050508 100%);
+        }
+
+        /* Equalizer Wave Bars */
+        .eq-bar {
+            width: 3px;
+            background-color: #60a5fa;
+            border-radius: 3px;
+            animation: eqAnim 1.2s infinite ease-in-out alternate;
+        }
+
+        .eq-bar:nth-child(1) { height: 16px; animation-delay: 0.1s; }
+        .eq-bar:nth-child(2) { height: 24px; animation-delay: 0.3s; }
+        .eq-bar:nth-child(3) { height: 12px; animation-delay: 0.5s; }
+        .eq-bar:nth-child(4) { height: 20px; animation-delay: 0.2s; }
+
+        .paused .eq-bar {
+            height: 4px !important;
+            animation: none !important;
+            opacity: 0.4;
+        }
+
+        @keyframes eqAnim {
+            0% { height: 6px; }
+            100% { height: 24px; }
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative flex items-center justify-center overflow-hidden">
+
+    <!-- 3D Background Canvas -->
+    <div id="canvas-container" class="absolute inset-0 z-0"></div>
+
+    <!-- Vignette / Atmosphere Overlays -->
+    <div class="absolute inset-0 vignette z-10 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 z-10 pointer-events-none"></div>
+
+    <!-- Top M Power Subtle Badge -->
+    <div class="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 shadow-lg pointer-events-none">
+        <div class="flex space-x-1">
+            <span class="w-2.5 h-3 bg-blue-500 transform -skew-x-12 rounded-sm"></span>
+            <span class="w-2.5 h-3 bg-blue-900 transform -skew-x-12 rounded-sm"></span>
+            <span class="w-2.5 h-3 bg-red-600 transform -skew-x-12 rounded-sm"></span>
+        </div>
+        <span class="text-xs font-orbitron tracking-widest text-gray-300 font-bold uppercase">M PERFORMANCE</span>
+    </div>
+
+    <!-- Main Interactive Card Content -->
+    <main class="relative z-20 max-w-lg w-full mx-4 animate-float">
+        <a href="https://vrstheft.github.io/Playlab/" 
+           target="_self"
+           id="main-card-link"
+           class="group block neon-border bg-gradient-to-b from-gray-900/80 to-black/90 p-8 sm:p-10 rounded-3xl text-center transition-all duration-500 transform hover:-translate-y-1 hover:scale-[1.01] cursor-pointer relative overflow-hidden">
+            
+            <!-- Shimmer Light Effect on Hover -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transform transition-transform duration-1000"></div>
+
+            <!-- Warning Icon Header -->
+            <div class="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-blue-400 group-hover:text-blue-300 group-hover:scale-110 group-hover:border-blue-400 transition-all duration-300 shadow-lg shadow-blue-500/10">
+                <i class="fa-solid font-bold fa-shield-halved text-3xl"></i>
+            </div>
+
+            <!-- Main Heading (User requested wording) -->
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3 font-orbitron drop-shadow-md group-hover:text-blue-100 transition-colors">
+                This site has been detected as blocked..
+            </h1>
+
+            <!-- Subtitle Text (User requested wording and grey styling) -->
+            <p class="text-gray-400 text-base sm:text-lg font-medium tracking-wide flex items-center justify-center gap-2 group-hover:text-gray-200 transition-colors">
+                <span>Click to go to unblocked site</span>
+                <i class="fa-solid fa-arrow-right text-sm text-blue-400 group-hover:translate-x-1.5 transition-transform duration-300"></i>
+            </p>
+
+            <!-- Bottom Glowing Indicator Bar -->
+            <div class="mt-8 w-full bg-gray-800/60 h-1.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full rounded-full w-full animate-pulse"></div>
+            </div>
+        </a>
+    </main>
+
+    <!-- Audio Player Controller floating at bottom right -->
+    <div class="absolute bottom-6 right-6 z-30 flex items-center gap-3 bg-black/60 backdrop-blur-xl p-2.5 px-4 rounded-2xl border border-white/10 shadow-2xl">
+        <button id="audio-toggle" class="flex items-center gap-3 text-gray-300 hover:text-white transition-colors focus:outline-none">
+            <!-- Animated Equalizer Bars -->
+            <div id="eq-container" class="flex items-end gap-1 h-6 px-1 paused">
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+                <div class="eq-bar"></div>
+            </div>
+            <div class="text-left">
+                <p id="audio-status-title" class="text-xs font-semibold text-gray-200">Chill Lofi Synth</p>
+                <p id="audio-status-sub" class="text-[10px] text-gray-400">Click to Play Music</p>
+            </div>
+            <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-sm ml-1 hover:bg-white/20 transition-colors">
+                <i id="audio-icon" class="fa-solid fa-play text-blue-400"></i>
+            </div>
+        </button>
+    </div>
+
+    <!-- Initial Touch / Click Audio Enable Prompt Banner -->
+    <div id="audio-toast" class="absolute bottom-6 left-6 z-30 bg-blue-900/40 backdrop-blur-md border border-blue-500/30 text-blue-200 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg animate-bounce pointer-events-none">
+        <i class="fa-solid fa-headphones text-blue-400"></i>
+        <span>Click anywhere to play chill ambient tunes</span>
+    </div>
+
+    <!-- THREE.JS 3D BMW CAR & SCENE SCRIPT -->
+    <script>
+        // --- 1. THREE.JS SCENE SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050508, 0.035);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.8, 6.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        container.appendChild(renderer.domElement);
+
+        // --- 2. LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0x1a1c29, 1.5);
+        scene.add(ambientLight);
+
+        // Neon Blue Overhead Spotlight
+        const topLight = new THREE.SpotLight(0x3b82f6, 4);
+        topLight.position.set(0, 8, 2);
+        topLight.angle = Math.PI / 4;
+        topLight.penumbra = 0.8;
+        scene.add(topLight);
+
+        // Soft Red/Purple Rear Light Accent
+        const rearLight = new THREE.PointLight(0xef4444, 2, 10);
+        rearLight.position.set(0, 1, -4);
+        scene.add(rearLight);
+
+        // Cyan Front Accent Light
+        const frontLight = new THREE.PointLight(0x06b6d4, 2, 10);
+        frontLight.position.set(0, 0.5, 4);
+        scene.add(frontLight);
+
+        // --- 3. PROCEDURAL BMW CAR MODEL CREATION ---
+        const carGroup = new THREE.Group();
+
+        // Car Body Material (Metallic Alpine Dark Finish)
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0a0c10,
+            metalness: 0.9,
+            roughness: 0.2,
+            envMapIntensity: 1.0
+        });
+
+        // Glass Material
+        const glassMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x050505,
+            metalness: 0.1,
+            roughness: 0.1,
+            transmission: 0.7,
+            transparent: true
+        });
+
+        // Glowing Headlight Material
+        const headlightMaterial = new THREE.MeshBasicMaterial({ color: 0x93c5fd });
+        // Glowing BMW Angel Eye Angel Ring Material
+        const angelEyeMaterial = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+        // Tail Light Material
+        const taillightMaterial = new THREE.MeshBasicMaterial({ color: 0xff1133 });
+        // Kidney Grille Material
+        const chromeMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.95, roughness: 0.1 });
+
+        // A. Main Chassis Body Base
+        const chassisGeo = new THREE.BoxGeometry(1.9, 0.55, 4.2);
+        const chassis = new THREE.Mesh(chassisGeo, bodyMaterial);
+        chassis.position.y = 0.55;
+        carGroup.add(chassis);
+
+        // B. Cabin / Roof (Sculpted BMW Coupe Silhouette)
+        const cabinGeo = new THREE.BoxGeometry(1.5, 0.5, 2.1);
+        const cabin = new THREE.Mesh(cabinGeo, bodyMaterial);
+        cabin.position.set(0, 0.95, -0.2);
+        carGroup.add(cabin);
+
+        // Windshield (Front Slanted Window)
+        const windshieldGeo = new THREE.PlaneGeometry(1.4, 0.7);
+        const windshield = new THREE.Mesh(windshieldGeo, glassMaterial);
+        windshield.position.set(0, 0.95, 0.85);
+        windshield.rotation.x = -Math.PI / 3.5;
+        carGroup.add(windshield);
+
+        // Rear Window
+        const rearWindow = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.6), glassMaterial);
+        rearWindow.position.set(0, 0.95, -1.22);
+        rearWindow.rotation.x = Math.PI / 3.5;
+        rearWindow.rotation.y = Math.PI;
+        carGroup.add(rearWindow);
+
+        // C. Iconic BMW Kidney Grille (Left & Right)
+        for (let side of [-0.22, 0.22]) {
+            const grilleGeo = new THREE.BoxGeometry(0.32, 0.22, 0.08);
+            const grille = new THREE.Mesh(grilleGeo, chromeMaterial);
+            grille.position.set(side, 0.55, 2.11);
+            carGroup.add(grille);
+
+            // Grille inner mesh slots
+            const grilleInnerGeo = new THREE.BoxGeometry(0.28, 0.18, 0.09);
+            const grilleInner = new THREE.Mesh(grilleInnerGeo, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+            grilleInner.position.set(side, 0.55, 2.115);
+            carGroup.add(grilleInner);
+        }
+
+        // D. BMW Headlights with Dual Angel Eyes
+        for (let side of [-0.68, 0.68]) {
+            // Light Housing
+            const lightHousingGeo = new THREE.BoxGeometry(0.38, 0.12, 0.15);
+            const housing = new THREE.Mesh(lightHousingGeo, headlightMaterial);
+            housing.position.set(side, 0.62, 2.05);
+            carGroup.add(housing);
+
+            // Angel Rings (Dual LED Halo signature)
+            for (let ringOffset of [-0.09, 0.09]) {
+                const ringGeo = new THREE.TorusGeometry(0.045, 0.012, 8, 16);
+                const ring = new THREE.Mesh(ringGeo, angelEyeMaterial);
+                ring.position.set(side + ringOffset, 0.62, 2.13);
+                carGroup.add(ring);
+            }
+        }
+
+        // E. BMW Tail Lights (L-shape signature look)
+        for (let side of [-0.68, 0.68]) {
+            const tailGeo = new THREE.BoxGeometry(0.42, 0.12, 0.1);
+            const tail = new THREE.Mesh(tailGeo, taillightMaterial);
+            tail.position.set(side, 0.65, -2.11);
+            carGroup.add(tail);
+        }
+
+        // F. Wheels & Rims
+        const wheelRadius = 0.36;
+        const wheelThick = 0.24;
+        const wheelGeo = new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelThick, 24);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 });
+
+        const wheels = [];
+        const wheelPositions = [
+            [-0.92, 0.36, 1.3],  // Front Left
+            [0.92, 0.36, 1.3],   // Front Right
+            [-0.92, 0.36, -1.3], // Rear Left
+            [0.92, 0.36, -1.3]   // Rear Right
+        ];
+
+        wheelPositions.forEach((pos) => {
+            const wheelHolder = new THREE.Group();
+            wheelHolder.position.set(...pos);
+
+            const tire = new THREE.Mesh(wheelGeo, wheelMat);
+            tire.rotation.z = Math.PI / 2;
+            wheelHolder.add(tire);
+
+            // Rim center cap
+            const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, wheelThick + 0.02, 12), rimMat);
+            rim.rotation.z = Math.PI / 2;
+            wheelHolder.add(rim);
+
+            carGroup.add(wheelHolder);
+            wheels.push(wheelHolder);
+        });
+
+        // Add BMW Emblem on Hood
+        const emblemGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.02, 16);
+        const emblemMat = new THREE.MeshBasicMaterial({ color: 0x006699 });
+        const emblem = new THREE.Mesh(emblemGeo, emblemMat);
+        emblem.position.set(0, 0.84, 1.85);
+        emblem.rotation.x = 0.2;
+        carGroup.add(emblem);
+
+        scene.add(carGroup);
+
+        // --- 4. ANIMATED ROAD AND NEON SPEED LINES ---
+        // Road Plane
+        const roadGeo = new THREE.PlaneGeometry(20, 100);
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x07070a, roughness: 0.3, metalness: 0.5 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        road.position.y = 0;
+        scene.add(road);
+
+        // Moving Side Neon Strips
+        const lineGeo = new THREE.BoxGeometry(0.08, 0.02, 100);
+        const lineMatBlue = new THREE.MeshBasicMaterial({ color: 0x3b82f6 });
+        const lineMatPurple = new THREE.MeshBasicMaterial({ color: 0x8b5cf6 });
+
+        const leftNeonLine = new THREE.Mesh(lineGeo, lineMatBlue);
+        leftNeonLine.position.set(-3.5, 0.02, 0);
+        scene.add(leftNeonLine);
+
+        const rightNeonLine = new THREE.Mesh(lineGeo, lineMatPurple);
+        rightNeonLine.position.set(3.5, 0.02, 0);
+        scene.add(rightNeonLine);
+
+        // Moving Grid / Dash Particles for Speed Feeling
+        const particleCount = 120;
+        const particleGeo = new THREE.BoxGeometry(0.06, 0.02, 0.8);
+        const particleMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.7 });
+        const speedDashes = [];
+
+        for (let i = 0; i < particleCount; i++) {
+            const dash = new THREE.Mesh(particleGeo, particleMat);
+            dash.position.set(
+                (Math.random() - 0.5) * 14,
+                0.01,
+                (Math.random() - 0.5) * 60
+            );
+            scene.add(dash);
+            speedDashes.push(dash);
+        }
+
+        // Mouse Parallax Effect
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.8;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
+        });
+
+        // --- 5. ANIMATION LOOP ---
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
+
+            // Animate Speed Dash Lines towards camera to simulate driving
+            speedDashes.forEach(dash => {
+                dash.position.z += 25 * delta;
+                if (dash.position.z > 15) {
+                    dash.position.z = -45;
+                    dash.position.x = (Math.random() - 0.5) * 14;
+                }
+            });
+
+            // Rotate Wheels
+            wheels.forEach(w => {
+                w.children[0].rotation.x += 18 * delta;
+            });
+
+            // Gentle Car Suspension Bounce & Sway
+            carGroup.position.y = Math.sin(elapsedTime * 4) * 0.025;
+            carGroup.rotation.z = Math.sin(elapsedTime * 2) * 0.015;
+            carGroup.rotation.y = Math.sin(elapsedTime * 1.5) * 0.03 + (mouseX * 0.2);
+
+            // Smooth Camera Follow Mouse
+            camera.position.x += (mouseX * 1.5 - camera.position.x) * 0.05;
+            camera.position.y += (1.8 - mouseY * 0.8 - camera.position.y) * 0.05;
+            camera.lookAt(0, 0.7, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        window.onload = function() {
+            animate();
+        };
+
+        // Window Resize Handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- 6. SYNTHESIZED CHILL LOFI AUDIO (WEB AUDIO API) ---
+        // Generates atmospheric ambient lofi chord progression without external audio file dependencies
+        let audioCtx = null;
+        let isPlaying = false;
+        let masterGain = null;
+        let musicInterval = null;
+
+        const chordProgression = [
+            [261.63, 329.63, 392.00, 493.88], // Cmaj7
+            [220.00, 261.63, 329.63, 392.00], // Am7
+            [174.61, 220.00, 261.63, 329.63], // Fmaj7
+            [196.00, 246.94, 293.66, 349.23]  // G7
+        ];
+        let chordIndex = 0;
+
+        function initAudio() {
+            if (audioCtx) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+
+            masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+
+            // Lowpass Filter for warm, chill lofi sound
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(650, audioCtx.currentTime);
+
+            masterGain.connect(filter);
+            filter.connect(audioCtx.destination);
+        }
+
+        function playLofiChord() {
+            if (!audioCtx || !isPlaying) return;
+
+            const now = audioCtx.currentTime;
+            const notes = chordProgression[chordIndex];
+            chordIndex = (chordIndex + 1) % chordProgression.length;
+
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const noteGain = audioCtx.createGain();
+
+                osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(freq, now);
+
+                // Gentle Attack & Long Soft Decay
+                noteGain.gain.setValueAtTime(0.001, now);
+                noteGain.gain.linearRampToValueAtTime(0.04, now + 0.8);
+                noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
+
+                osc.connect(noteGain);
+                noteGain.connect(masterGain);
+
+                osc.start(now);
+                osc.stop(now + 4.0);
+            });
+        }
+
+        function toggleAudio(enable) {
+            initAudio();
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (enable === undefined) {
+                isPlaying = !isPlaying;
+            } else {
+                isPlaying = enable;
+            }
+
+            const eqContainer = document.getElementById('eq-container');
+            const audioIcon = document.getElementById('audio-icon');
+            const statusSub = document.getElementById('audio-status-sub');
+            const toast = document.getElementById('audio-toast');
+
+            if (toast) toast.style.display = 'none';
+
+            if (isPlaying) {
+                eqContainer.classList.remove('paused');
+                audioIcon.className = 'fa-solid fa-pause text-blue-400';
+                statusSub.innerText = 'Now Playing';
+                playLofiChord();
+                musicInterval = setInterval(playLofiChord, 3600);
+            } else {
+                eqContainer.classList.add('paused');
+                audioIcon.className = 'fa-solid fa-play text-blue-400';
+                statusSub.innerText = 'Paused';
+                if (musicInterval) clearInterval(musicInterval);
+            }
+        }
+
+        // Toggle Audio Button
+        document.getElementById('audio-toggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAudio();
+        });
+
+        // Autoplay trigger on first user interaction anywhere on the document
+        const handleFirstInteraction = () => {
+            if (!isPlaying) {
+                toggleAudio(true);
+            }
+            window.removeEventListener('click', handleFirstInteraction);
+            window.removeEventListener('keydown', handleFirstInteraction);
+            window.removeEventListener('touchstart', handleFirstInteraction);
+        };
+
+        window.addEventListener('click', handleFirstInteraction);
+        window.addEventListener('keydown', handleFirstInteraction);
+        window.addEventListener('touchstart', handleFirstInteraction);
+    </script>
+</body>
+</html>
